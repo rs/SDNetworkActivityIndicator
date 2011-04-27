@@ -16,13 +16,7 @@ static SDNetworkActivityIndicator *instance;
 {
     if (instance == nil)
     {
-        @synchronized(instance)
-        {
-            if (instance == nil)
-            {
-                instance = [[SDNetworkActivityIndicator alloc] init];
-            }
-        }
+        instance = [[SDNetworkActivityIndicator alloc] init];
     }
 
     return instance;
