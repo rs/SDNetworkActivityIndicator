@@ -8,6 +8,15 @@
 
 #import "SDNetworkActivityIndicator.h"
 
+/* if you define this precompiler variable the SDNetworkActivityIndicator will just
+ * be a proxy to the AFNetworkActivityIndicatorManager. It can be defined in the 
+ * .pch file of the project. 
+ */
+#ifdef SDNetworkActivityIndicatorAFNetworkSupport
+#import "AFNetworkActivityIndicatorManager.h"
+#endif
+
+
 static SDNetworkActivityIndicator *instance;
 
 @implementation SDNetworkActivityIndicator
@@ -36,10 +45,14 @@ static SDNetworkActivityIndicator *instance;
 {
     @synchronized(self)
     {
+#ifndef SDNetworkActivityIndicatorAFNetworkSupport
         if (counter == 0)
         {
             [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
         }
+#else
+            [[AFNetworkActivityIndicatorManager sharedManager] incrementActivityCount];
+#endif
         counter++;
     }
 }
@@ -48,10 +61,17 @@ static SDNetworkActivityIndicator *instance;
 {
     @synchronized(self)
     {
+#ifdef SDNetworkActivityIndicatorAFNetworkSupport
+        if ( counter>0) {
+            [[AFNetworkActivityIndicatorManager sharedManager] decrementActivityCount];
+            --counter;
+        }
+#else
         if (counter > 0 && --counter == 0)
         {
-            [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+           [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];            
         }
+#endif
     }
 }
 
@@ -59,8 +79,13 @@ static SDNetworkActivityIndicator *instance;
 {
     @synchronized(self)
     {
+#ifndef SDNetworkActivityIndicatorAFNetworkSupport
         counter = 0;
         [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+#else
+        for(;counter>0; counter--)
+            [[AFNetworkActivityIndicatorManager sharedManager] decrementActivityCount];
+#endif
     }
 }
 
