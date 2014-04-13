@@ -8,18 +8,24 @@
 
 #import "SDNetworkActivityIndicator.h"
 
-static SDNetworkActivityIndicator *instance;
+@interface SDNetworkActivityIndicator()
+{
+    @private NSUInteger counter;
+}
+@end
+
 
 @implementation SDNetworkActivityIndicator
 
-+ (id)sharedActivityIndicator
++ (instancetype) sharedActivityIndicator
 {
-    if (instance == nil)
-    {
-        instance = [[SDNetworkActivityIndicator alloc] init];
-    }
-
-    return instance;
+    static id _sharedInstance = nil;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        _sharedInstance = [[self alloc] init];
+    });
+    
+    return _sharedInstance;
 }
 
 - (id)init
@@ -36,11 +42,8 @@ static SDNetworkActivityIndicator *instance;
 {
     @synchronized(self)
     {
-        if (counter == 0)
-        {
-            [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
-        }
         counter++;
+        [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
     }
 }
 
